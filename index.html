@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#071117">
+  <meta name="description" content="Інтерактивна карта регулярних рейсів Ukraine Classic Air Alliance">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="UKL · Route Network">
+  <meta property="og:description" content="Інтерактивна карта регулярних рейсів Ukraine Classic Air Alliance">
+  <meta property="og:image" content="./assets/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="UKL · Route Network">
+  <meta name="twitter:description" content="Інтерактивна карта регулярних рейсів Ukraine Classic Air Alliance">
+  <meta name="twitter:image" content="./assets/og.png">
+  <title>UKL · Route Network</title>
+  <link rel="icon" href="./assets/og.png" type="image/png">
+  <link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" id="brand-home" aria-label="Очистити вибір і показати всю мережу">
+      <span class="brand-code">UKL</span>
+      <span class="brand-copy"><strong>Route Network</strong><small>Ukraine Classic Air Alliance</small></span>
+    </a>
+    <div class="network-summary" aria-live="polite">
+      <span><b id="summary-schedules">—</b> розкладів</span>
+      <span><b id="summary-airports">—</b> аеропортів</span>
+      <span class="export-time"><i></i> 24 Aug 2026 · 06:57 UTC</span>
+    </div>
+    <button class="mobile-filter-button" id="mobile-filter-button" type="button" aria-expanded="false" aria-controls="search-panel">Фільтри</button>
+  </header>
+
+  <main class="map-shell">
+    <div id="map" aria-label="Інтерактивна карта рейсів UKL"></div>
+
+    <section class="search-panel surface" id="search-panel" aria-label="Пошук і фільтри рейсів">
+      <div class="panel-heading">
+        <div><span class="eyebrow">Пошук маршруту</span><h1>Куди летимо?</h1></div>
+        <button class="icon-button close-mobile" id="close-mobile-filters" type="button" aria-label="Закрити фільтри">×</button>
+      </div>
+
+      <form id="route-form" class="route-form">
+        <label class="airport-field">
+          <span>Звідки</span>
+          <input id="origin-input" list="airport-options" autocomplete="off" placeholder="UKBB або Бориспіль">
+        </label>
+        <button class="swap-button" id="swap-route" type="button" aria-label="Поміняти аеропорти місцями">⇅</button>
+        <label class="airport-field">
+          <span>Куди</span>
+          <input id="destination-input" list="airport-options" autocomplete="off" placeholder="EVRA або Рига">
+        </label>
+        <datalist id="airport-options"></datalist>
+        <label class="roundtrip-option"><input id="roundtrip-input" type="checkbox" checked><span></span> Показати також рейси назад</label>
+        <button class="primary-button" type="submit">Знайти рейси <span>→</span></button>
+      </form>
+
+      <div class="divider"><span>або фільтрувати мережу</span></div>
+
+      <label class="global-search">
+        <span class="search-icon"></span>
+        <input id="flight-search" type="search" placeholder="Номер рейсу, ICAO, місто…">
+        <kbd>⌘ K</kbd>
+      </label>
+
+      <div class="filter-block">
+        <div class="filter-label"><span>Тип рейсу</span><button id="reset-filters" type="button">Скинути</button></div>
+        <div class="segmented" id="type-filter" role="group" aria-label="Тип рейсу">
+          <button class="active" type="button" data-type="all">Усі</button>
+          <button type="button" data-type="pax"><i class="pax-dot"></i> PAX</button>
+          <button type="button" data-type="cargo"><i class="cargo-dot"></i> Cargo</button>
+        </div>
+      </div>
+
+      <div class="filter-block">
+        <span class="filter-label">День виконання</span>
+        <div class="day-filter" id="day-filter" role="group" aria-label="День виконання">
+          <button class="active" type="button" data-day="all">Усі</button>
+          <button type="button" data-day="mon">Пн</button><button type="button" data-day="tue">Вт</button>
+          <button type="button" data-day="wed">Ср</button><button type="button" data-day="thu">Чт</button>
+          <button type="button" data-day="fri">Пт</button><button type="button" data-day="sat">Сб</button>
+          <button type="button" data-day="sun">Нд</button>
+        </div>
+      </div>
+
+      <label class="select-field">
+        <span class="filter-label">Доступний літак</span>
+        <select id="airframe-filter"><option value="all">Усі типи літаків</option></select>
+      </label>
+
+      <div class="filter-result" id="filter-result"><span>Завантаження розкладу…</span></div>
+    </section>
+
+    <div class="map-actions" aria-label="Керування картою">
+      <button id="fit-map" type="button" title="Показати всю мережу"><span>⌖</span> Уся мережа</button>
+      <button id="clear-selection" type="button" title="Очистити вибір" hidden><span>×</span> Очистити</button>
+    </div>
+
+    <div class="legend surface" aria-label="Легенда карти">
+      <span><i class="legend-dot airport"></i> Аеропорт</span>
+      <span><i class="legend-line pax"></i> PAX</span>
+      <span><i class="legend-line cargo"></i> Cargo</span>
+    </div>
+
+    <aside class="details-panel surface" id="details-panel" aria-live="polite" aria-label="Деталі вибору">
+      <div id="details-empty" class="details-empty">
+        <div class="empty-radar"><i></i></div>
+        <span class="eyebrow">Route explorer</span>
+        <h2>Оберіть аеропорт</h2>
+        <p>Клікніть по точці на карті — я покажу всі регулярні рейси з цього аеропорту.</p>
+      </div>
+      <div id="details-content" hidden></div>
+    </aside>
+
+    <div class="loading-screen" id="loading-screen">
+      <span class="loader-mark">UKL</span>
+      <p>Будуємо маршрутну мережу…</p>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <noscript><div class="noscript">Для роботи карти потрібен JavaScript.</div></noscript>
+  <script src="./vendor/leaflet/leaflet.js"></script>
+  <script src="./assets/app.js"></script>
+</body>
+</html>
