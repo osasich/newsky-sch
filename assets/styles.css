@@ -49,7 +49,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .map-shell { position: relative; height: calc(100dvh - 68px); isolation: isolate; overflow: hidden; }
 #map { position: absolute; inset: 0; z-index: 1; background: #08151c; }
 .leaflet-container { font: inherit; }
-.leaflet-tile-pane { filter: saturate(.78) brightness(.88); }
+.leaflet-tile-pane { filter: brightness(.55) invert(1) contrast(1.35) hue-rotate(180deg) saturate(.35); }
 .leaflet-control-attribution { padding: 3px 7px !important; color: #71868c !important; background: rgba(7,17,23,.74) !important; font-size: 9px !important; }
 .leaflet-control-attribution a { color: #9cb1b5 !important; }
 .leaflet-bar { overflow: hidden; border: 1px solid var(--line-strong) !important; border-radius: 0 !important; box-shadow: var(--shadow) !important; }
